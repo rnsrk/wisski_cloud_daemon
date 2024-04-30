@@ -1,0 +1,247 @@
+openapi: "3.1.0"
+info:
+  version: 1.0.0
+  title: WissKI Cloud API
+  summary: Handles account creation and validation requests.
+  contact: 
+    name: Robert Nasarek
+    email: r.nasarek@gnm.de
+  licence: 
+    name: AGPL 2
+    url: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+    
+servers:
+  - url: http://{host}:{port}/wisski-cloud-daemon/api/v1
+    description: Production server
+    variables: 
+      host:
+        default: localhost
+        descriptions: Host name of the server
+      port:
+        default: 3000
+        descriptions: Port number of the server
+  - url: http://[host]:{port}/wisski-cloud-daemon/api/v1
+    description: Local server
+    variables: 
+      host:
+          default: localhost
+          descriptions: Host name of the server
+      port:
+        default: 3000
+        descriptions: Port number of the server
+paths:
+  /healthcheck:
+    get:
+      summary: Healthcheck of API
+      tags:
+        [ 'healthcheck' ]
+      responses:
+        '200':
+          description: success
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /account/all:
+    get:
+      summary: Show all users
+      tags:
+        [ 'accounts' ]
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  "$ref": "#/components/schemas/DbAccount"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /account/:
+    post:
+      summary: Adds new account
+      tags:
+        [ 'add account' ]
+      requestBody: 
+        description: "Account object that needs to be added"
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/FormAccount"    
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/DbAccount"
+                  "message": "Account added successfully."
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /account/{id}:
+    delete:
+      summary: Delete account with id
+      tags:
+        [ 'delete account' ]
+      responses:
+        '200':
+          description: success
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: Show account with id
+      tags:
+        [ 'show account' ]
+      responses:
+        '200':
+          description: success
+          content :
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GetAccount"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Update account with id
+      tags:
+        [ 'update account' ]
+      responses:
+        '200':
+          description: success
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    parameters:
+      name: id
+      in: path
+      description: "ID of account to show"
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
+      style: simple
+components:
+  schemas:
+    Error:
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    DbAccount:
+      properties:
+        personName: 
+          type: string
+          example: "Peter Peterson"
+          description: "Name of the person"
+        organisation: 
+          type: string
+          example: "Example Organisation"
+        email: 
+          type: string
+          example: "peter@example.com"
+          description: "Email of the person"
+        username: 
+          type: string
+          example: "peter"
+          description: "Username of the person"
+        subdomain: 
+            type: string
+            example: "my_instance"
+            description: "Subdomain of the person"
+        validationCode: 
+            type: string
+            example: "B9s8uP1xlG9411MFj32bQEsBya6NeSrJ"
+            description: "Validation code of the person"
+        valid:
+            type: boolean
+            example: false
+            description: "Is the account valid?"
+        provisioned: 
+            type: boolean
+            example: false
+            description: "Is the account provisioned?"
+        _id: 
+            type: string
+            example: "64e5c5dacbf0ce4fbfdec62a"
+            description: "ID of the account"
+        createdAt: 
+            type: date
+            example: "2021-08-23T08:20:07.749Z"
+            description: "Creation date of the account"
+        updatedAt: 
+            type: date
+            example: "2021-08-23T08:20:07.749Z"
+            description: "Update date of the account"
+        __v: 
+            type: integer
+            example: 0
+            description: "Version of the account"
+    FormAccount:
+      properties:
+        personName:
+          type: string
+          example: "Peter Peterson"
+          description: "Name of the person"
+        organisation:
+          type: string
+          example: "Example Organisation"
+        email:
+          type: string
+          example: "peter@example.com"
+          description: "Email of the person"
+        username:
+          type: string
+          example: "peter"
+          description: "Username of the person"
+        subdomain:
+          type: string
+          example: "my_instance"
+          description: "Subdomain of the person"
+        password:
+          type: string
+          example: "123456789ABCDEFGHIJKLMOPQRSTUVWXYZ"
+          description: "Password of the person"
+    GetAccount:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        validationCode:
+          type: string
+        createdAt:
+          type: date
+        updatedAt:
+          type: data
